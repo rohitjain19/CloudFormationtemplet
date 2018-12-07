@@ -1,0 +1,54 @@
+Parameters:
+  EnviromentSize:
+    Type: String
+    Default: SMALL
+    AllowedValues:
+      - SMALL
+      - MEDIUM
+      - LARGE
+    Description: Select Environment Size (S,M,L)
+  
+Mappings:
+  RegionMap:
+    us-east-1:
+      "AMALINUX" : "ami-0080e4c5bc078760e"
+    us-east-2:
+      "AMALINUX" : "ami-0cd3dfa4e37921605"
+    us-west-1:
+      "AMALINUX" : "ami-0ec6517f6edbf8044"
+    us-west-1:
+      "AMALINUX" : "ami-01e24be29428c15b2"
+
+  InstanceSize:
+    SMALL:
+      "EC2" : "t2.micro"
+      "DB" : "db.t2.micro"
+    MEDIUM:
+      "EC2" : "t2.small"
+      "DB" : "db.t2.small"
+    LARGE:
+      "EC2": "t2.medium"
+      "DB" : "db.t2.small"
+
+Resources:
+  DB:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      AllocatedStorage: 5
+      StorageType: gp2
+      DBInstanceClass: !FindInMap [InstanceSize, !Ref EnviromentSize, DB] #Dynamic Mapping + Pseudo Parameter
+      DBName: wordpress
+      Engine: MySQL
+      MasterUsername: wordpress
+      MasterUserPassword: w0rdpr355
+  EC2:
+    Type: "AWS::EC2::Instance"
+    Properties:
+      ImageId: !FindInMap [RegionMap, !Ref "AWS::Region", AMALINUX] # Dynamic mapping + Pseudo Parameter
+      InstanceType: !FindInMap [InstanceSize, !Ref EnviromentSize, EC2]
+  S3:
+    Type: "AWS::S3::Bucket"
+
+
+
+
